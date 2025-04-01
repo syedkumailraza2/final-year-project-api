@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import userRouter from "./router/user.routes.js"
 import connectDB from "./config/database.js"
 import cors from "cors"
+import assignmentRouter from "./router/assignment.routes.js"
 
 dotenv.config()
 
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/user',userRouter)
+app.use('/assignment',assignmentRouter)
 
 app.listen(PORT, ()=>{
     console.log(`Server running on http://localhost:${PORT}`);
