@@ -30,7 +30,7 @@ const createAssignment = async (req, res) => {
             course,
             instructor
         })
-        res.status(201).json({ newAssignment });
+        return res.status(201).json({ newAssignment });
 
     } catch (error) {
         console.log('Error while creating assignment:', error);
@@ -45,11 +45,44 @@ const deleteAssignment = async (req, res) => {
         if (!assignment) {
             return res.status(404).json({ message: "Assignment not found" });
         }
-        res.status(200).json({ message: "Assignment deleted successfully" });
+        return res.status(200).json({ message: "Assignment deleted successfully" });
     }
     catch (error) {
 
     }
 }
 
-export { createAssignment, deleteAssignment };
+const updateAssignment = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const existingAssignment = await Assignment.findById(id);
+
+        if (!existingAssignment) {
+            return res.status(404).json({ message: "Assignment not found" });
+        }
+
+        const updatedAsmt = await Assignment.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true } // Returns updated document
+        );
+
+        return res.status(200).json({ updatedAsmt });
+
+    } catch (error) {
+        console.log('Error while updating assignment:', error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const getAllAssignment = async (req, res) => {
+    try {
+        const assignments = await Assignment.find();
+        return res.status(200).json(assignments);
+    } catch (error) {
+        console.log('Error while Getting All assignments:', error);
+        return res.status(200).json({ message: "Internal Server Error" });
+    }
+}
+
+export { createAssignment, deleteAssignment, updateAssignment, getAllAssignment };
