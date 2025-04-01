@@ -36,6 +36,14 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10); // Generate salt
         const hashedPassword = await bcrypt.hash(password, salt); // Hash password
 
+        let profilePicPath = null;
+
+        // If a file is uploaded, store its path
+        if (req.file) {
+            profilePicPath = `/uploads/${req.file.filename}`; // Store relative path
+        }
+        console.log('profilePic: ',profilePicPath);
+        
 
         const user = await User.create({ name, email, password: hashedPassword, course, year })
 
