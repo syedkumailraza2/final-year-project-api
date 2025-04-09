@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes API Client</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .page-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto 25px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .section-title {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border 0.3s ease;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .file-input-container {
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.delete-btn {
+            background-color: #e74c3c;
+            width: auto;
+            padding: 8px 12px;
+            margin-top: 5px;
+        }
+        button.delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .note {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .note h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .note p {
+            margin: 10px 0;
+            color: #555;
+        }
+        .file-link {
+            display: inline-block;
+            margin: 5px 0;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+        .note-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0;
+        }
+        .view-btn, .download-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .view-btn {
+            background-color: #3498db;
+        }
+        .view-btn:hover {
+            background-color: #2980b9;
+        }
+        .download-btn {
+            background-color: #27ae60;
+        }
+        .download-btn:hover {
+            background-color: #219653;
+        }
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        .loading:after {
+            content: "Loading...";
+            color: #666;
+        }
+        .no-notes {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-sm {
+            width: auto;
+            padding: 8px 12px;
+            margin: 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title">Notes API Client</h1>
+
+    <div class="container">
+        <h3 class="section-title">Create a New Note</h3>
+        <form id="uploadForm">
+            <input type="text" id="noteTitle" placeholder="Title" required>
+            <textarea id="noteDescription" placeholder="Description" rows="4"></textarea>
+            <div class="file-input-container">
+                <input type="file" id="noteFile">
+            </div>
+            <button type="submit">Upload Note</button>
+        </form>
+        <div id="uploadStatus" class="status-message"></div>
+    </div>
+
+    <div class="container">
+        <h3 class="section-title">Search Notes</h3>
+        <form id="searchForm">
+            <input type="text" id="searchQuery" placeholder="Search by title">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h3 class="section-title">My Notes</h3>
+        <button id="loadNotesBtn">Load All Notes</button>
+        <div id="loadingNotes" class="loading"></div>
+        <div id="notesStatus" class="status-message"></div>
+        <div id="notesList"></div>
+    </div>
+
+    <script>
+        // API Base URL - make sure this matches your backend
+        const API_URL = "https://final-year-project-api-6xmo.onrender.com/notes";
+        const SERVER_BASE_URL = "https://final-year-project-api-6xmo.onrender.com";
+        
+        // DOM Elements
+        const uploadForm = document.getElementById("uploadForm");
+        const searchForm = document.getElementById("searchForm");
+        const loadNotesBtn = document.getElementById("loadNotesBtn");
+        const uploadStatus = document.getElementById("uploadStatus");
+        const notesStatus = document.getElementById("notesStatus");
+        const loadingNotes = document.getElementById("loadingNotes");
+        const notesList = document.getElementById("notesList");
+
+        // Helper functions
+        function showMessage(element, message, isError = false) {
+            element.textContent = message;
+            element.className = "status-message";
+            element.classList.add(isError ? "status-error" : "status-success");
+            element.style.display = "block";
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                element.style.display = "none";
+            }, 5000);
+        }
+
+        // Fix file path to make it accessible through the API
+        function fixFilePath(path) {
+            if (!path) return '';
+            
+            // Remove any absolute path prefixes that might be in the database
+            // This extracts just the filename part or the relative path
+            let normalizedPath = path;
+            
+            // Handle Windows-style paths like E:/Final-Year/Shadab-api/public/uploads/filename.pdf
+            if (path.includes(':/')) {
+                // Extract just the uploads/filename part
+                const matches = path.match(/.*\/public\/(.+)/);
+                if (matches && matches[1]) {
+                    normalizedPath = matches[1];
+                } else {
+                    // Fallback to just the filename
+                    normalizedPath = path.split('/').pop();
+                }
+            }
+            
+            // Make the path relative to the server root
+            if (normalizedPath.startsWith('/')) {
+                normalizedPath = normalizedPath.substring(1);
+            }
+            
+            // Return full URL to the file
+            return `${SERVER_BASE_URL}/${normalizedPath}`;
+        }
+
+        function renderNotes(notes) {
+            notesList.innerHTML = "";
+            
+            if (!notes || notes.length === 0) {
+                notesList.innerHTML = '<div class="no-notes">No notes found.</div>';
+                return;
+            }
+            
+            notes.forEach(note => {
+                // Fix the file path to be accessible through the API
+                let filePath = fixFilePath(note.filePath);
+                console.log("Original path:", note.filePath);
+                console.log("Fixed path:", filePath);
+                
+                // Prepare file actions HTML
+                let fileActionsHtml = '<span>No attachment</span>';
+                if (note.filePath) {
+                    // Get the filename from the path
+                    const fileName = note.filePath.split('/').pop() || 'file';
+                    
+                    fileActionsHtml = `
+                        <div class="file-actions">
+                            <a href="${filePath}" class="view-btn" target="_blank" rel="noopener">View</a>
+                            <a href="${filePath}" class="download-btn" download="${fileName}">Download</a>
+                        </div>
+                    `;
+                }
+                
+                const noteId = note._id || note.id || ''; // Handle different ID formats
+                
+                notesList.innerHTML += `
+                    <div class="note" data-id="${noteId}">
+                        <h4>${escapeHTML(note.title || 'Untitled')}</h4>
+                        <p>${escapeHTML(note.description || 'No description')}</p>
+                        ${fileActionsHtml}
+                        <div class="note-actions">
+                            <div class="btn-container">
+                                <button class="delete-btn btn-sm" data-id="${noteId}">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const noteId = this.getAttribute('data-id');
+                    if (confirm('Are you sure you want to delete this note?')) {
+                        deleteNote(noteId);
+                    }
+                });
+            });
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Upload Note
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById("noteTitle").value.trim();
+            const description = document.getElementById("noteDescription").value.trim();
+            const fileInput = document.getElementById("noteFile");
+            const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+            
+            if (!title) {
+                showMessage(uploadStatus, "Please provide a title for your note.", true);
+                return;
+            }
+            
+            let formData = new FormData();
+            formData.append("title", title);
+            formData.append("description", description);
+            
+            if (file) {
+                formData.append("file", file);
+            }
+            
+            // Disable form during upload
+            const submitBtn = uploadForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Uploading...";
+            
+            fetch(`${API_URL}/upload`, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showMessage(uploadStatus, "Note uploaded successfully!");
+                uploadForm.reset();
+                getAllNotes();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showMessage(uploadStatus, "Failed to upload note. Please try again.", true);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Upload Note";
+            });
+        });
+
+        // Get All Notes
+        function getAllNotes() {
+            loadingNotes.style.display = "block";
+            notesList.innerHTML = "";
+            
+            fetch(API_URL)
+            .then(handleResponse)
+            .then(data => {
+                console.log("Notes data:", data);
+                renderNotes(data);
+            })
+            .catch(error => {
+                console.error("Error fetching notes:", error);
+                showMessage(notesStatus, "Failed to load notes: " + error.message, true);
+            })
+            .finally(() => {
+                loadingNotes.style.display = "none";
+            });
+        }
+
+        // Handle API response consistently
+        function handleResponse(response) {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    try {
+                        // Try to parse as JSON to get error message
+                        const json = JSON.parse(text);
+                        throw new Error(json.message || `Server error: ${response.status}`);
+                    } catch (e) {
+                        // If parsing fails, use status text
+                        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    }
+                });
+            }
+            
+            return response.json().catch(error => {
+                console.error("Error parsing JSON:", error);
+                throw new Error("Invalid response from server");
+            });
+        }
+
+        // Search Notes
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const query = document.getElementById("searchQuery").value.trim();
+            loadingNotes.style.display = "block";
+            notesList.innerHTML = "";
+            
+            fetch(`${API_URL}/search?title=${encodeURIComponent(query)}`)
+            .then(handleResponse)
+            .then(data => {
+                renderNotes(data);
+                if (data.length === 0) {
+                    showMessage(notesStatus, `No notes found matching "${query}"`);
+                }
+            })
+            .catch(error => {
+                console.error("Error searching notes:", error);
+                showMessage(notesStatus, "Search failed: " + error.message, true);
+            })
+            .finally(() => {
+                loadingNotes.style.display = "none";
+            });
+        });
+
+        // Delete Note
+        function deleteNote(id) {
+            if (!id) {
+                showMessage(notesStatus, "Invalid note ID", true);
+                return;
+            }
+            
+            const noteElement = document.querySelector(`.note[data-id="${id}"]`);
+            if (noteElement) {
+                noteElement.style.opacity = "0.5";
+            }
+            
+            fetch(`${API_URL}/${id}`, { 
+                method: "DELETE" 
+            })
+            .then(handleResponse)
+            .then(data => {
+                showMessage(notesStatus, "Note deleted successfully!");
+                if (noteElement) {
+                    noteElement.remove();
+                }
+                
+                // If no notes left, check if we need to show "no notes" message
+                if (notesList.children.length === 0) {
+                    notesList.innerHTML = '<div class="no-notes">No notes found.</div>';
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting note:", error);
+                showMessage(notesStatus, "Failed to delete note: " + error.message, true);
+                if (noteElement) {
+                    noteElement.style.opacity = "1";
+                }
+            });
+        }
+
+        // Load notes when button is clicked
+        loadNotesBtn.addEventListener('click', getAllNotes);
+        
+        // Debug function to check communication with API
+        function checkApiConnection() {
+            console.log("Checking API connection...");
+            fetch(API_URL, { method: "GET" })
+                .then(response => {
+                    console.log("API Response Status:", response.status);
+                    return response.text();
+                })
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        console.log("API Response Data:", data);
+                    } catch (e) {
+                        console.log("API Response (not JSON):", text);
+                    }
+                })
+                .catch(error => {
+                    console.error("API Connection Error:", error);
+                });
+        }
+        
+        // Load notes automatically when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check API connection in console for debugging
+            checkApiConnection();
+            // Load notes automatically
+            getAllNotes();
+        });
+    </script>
+</body>
+</html>

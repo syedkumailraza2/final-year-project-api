@@ -1,102 +1,93 @@
-import Notes from "../model/notes.model.js";
-import fs from "fs";
+import Note from "../model/notes.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
-// Upload Note (supports PDF, audio, video)
-const uploadNote = async (req, res) => {
+// Create Note
+const createNote = async (req, res) => {
     try {
-        const { title, description } = req.body;
-
-        if (!title) {
-            if (req.file) fs.unlinkSync(req.file.path);  // Delete uploaded file if title is missing
-            return res.status(400).json({ message: "Title is required" });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({ message: "File is required" });
-        }
-
-        const filePath = req.file.path.replace(/\\/g, "/");
-        const note = new Notes({ 
-            title, 
-            description, 
-            filePath,
-            fileType: req.fileType,  // From multer middleware
+        const { title, description, notesText, course, year, subject } = req.body;
+        
+        const newNote = new Note({
+            title,
+            description,
+            notesText,
+            course,
+            year,
+            subject
         });
 
-        await note.save();
-        res.status(201).json({ message: "Note uploaded successfully", note });
+        if(req.file) {
+            newNote.images = {
+                public_id: req.file.public_id,
+                url: req.file.path
+            }
+        }
+
+        await newNote.save();
+        res.status(201).json(newNote);
     } catch (error) {
-        if (req.file) fs.unlinkSync(req.file.path);  // Cleanup on error
-        res.status(500).json({ message: "Server Error", error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Get All Notes
 const getNotes = async (req, res) => {
     try {
-        const notes = await Notes.find();
-        res.status(200).json(notes);
+        const notes = await Note.find();
+        res.json(notes);
     } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// Get Single Note by ID
-const getNoteById = async (req, res) => {
-    try {
-        const note = await Notes.findById(req.params.id);
-        if (!note) return res.status(404).json({ message: "Note not found" });
-        res.status(200).json(note);
-    } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
-    }
-};
-
-// Search Notes by Title
-const searchNotes = async (req, res) => {
-    try {
-        const query = req.query.q;
-        const notes = await Notes.find({
-            title: { $regex: query, $options: "i" },
-        });
-        res.status(200).json(notes);
-    } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
-    }
-};
-
-// Update Note (title/description only)
+// Update Note
 const updateNote = async (req, res) => {
     try {
-        const { title, description } = req.body;
-        const updatedNote = await Notes.findByIdAndUpdate(
+        const note = await Note.findById(req.params.id);
+        if(!note) return res.status(404).json({ message: 'Note not found' });
+
+        if(req.file && note.images.public_id) {
+            await cloudinary.uploader.destroy(note.images.public_id);
+        }
+
+        const updateData = {
+            ...req.body,
+            ...(req.file && {
+                images: {
+                    public_id: req.file.public_id,
+                    url: req.file.path
+                }
+            })
+        };
+
+        const updatedNote = await Note.findByIdAndUpdate(
             req.params.id,
-            { title, description },
+            updateData,
             { new: true }
         );
 
-        if (!updatedNote) return res.status(404).json({ message: "Note not found" });
-        res.status(200).json({ message: "Note updated successfully", updatedNote });
+        res.json(updatedNote);
     } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-// Delete Note (with file cleanup)
+// Delete Note
+// Delete Note
 const deleteNote = async (req, res) => {
-    try {
-        const note = await Notes.findById(req.params.id);
-        if (!note) return res.status(404).json({ message: "Note not found" });
+  try {
+      const note = await Note.findById(req.params.id);
+      if(!note) return res.status(404).json({ message: 'Note not found' });
 
-        // Delete the file from server
-        fs.unlinkSync(note.filePath);
+      if(note.images.public_id) {
+          await cloudinary.uploader.destroy(note.images.public_id);
+      }
 
-        // Delete from DB
-        await Notes.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Note and file deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Server Error", error: error.message });
-    }
+      await note.deleteOne(); // Updated method
+      
+      res.json({ message: 'Note deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
 };
 
-export { uploadNote, getNotes, getNoteById, searchNotes, updateNote, deleteNote };
+export { createNote, getNotes, updateNote, deleteNote };
