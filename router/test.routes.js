@@ -6,6 +6,6 @@ import Test from "../model/test.model.js";
 
 const Testpath=Router()
 
-Testpath.post('/',protect,createTest)
-Testpath.delete('/:id',protect,deleteTest)
+Testpath.post('/',createTest)
+Testpath.delete('/:id',deleteTest)
 export default Testpath
