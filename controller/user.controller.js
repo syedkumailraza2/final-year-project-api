@@ -8,6 +8,7 @@ const generateToken = (id) => {
     })
 }
 
+
 const register = async (req, res) => {
     try {
 
@@ -40,12 +41,12 @@ const register = async (req, res) => {
 
         // If a file is uploaded, store its path
         if (req.file) {
-            profilePicPath = `/uploads/${req.file.filename}`; // Store relative path
+            profilePicPath = req.file; // Store relative path
         }
-        console.log('profilePic: ',profilePicPath);
+        console.log('profilePic: ',profilePicPath.path);
         
 
-        const user = await User.create({ name, email, password: hashedPassword, course, year })
+        const user = await User.create({ name, email, password: hashedPassword, course, year, profilePic: profilePicPath.path });
 
         return res.status(201).json({user})
 
