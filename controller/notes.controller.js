@@ -38,7 +38,18 @@ const getNotes = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
+const getNoteById = async (req, res) => {
+    try {
+      const note = await Note.findById(req.params.id);
+      if (!note) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+      res.json(note);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  
 // Update Note
 const updateNote = async (req, res) => {
     try {
@@ -72,7 +83,6 @@ const updateNote = async (req, res) => {
 };
 
 // Delete Note
-// Delete Note
 const deleteNote = async (req, res) => {
   try {
       const note = await Note.findById(req.params.id);
@@ -90,4 +100,4 @@ const deleteNote = async (req, res) => {
   }
 };
 
-export { createNote, getNotes, updateNote, deleteNote };
+export { createNote, getNotes, updateNote, deleteNote ,  getNoteById };

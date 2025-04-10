@@ -8,6 +8,7 @@ import Testpath from "./router/test.routes.js"
 import notesRoutes from "./router/notes.routes.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import lectureRouter from "./router/lecture.routes.js"
 
 dotenv.config()
 
@@ -48,6 +49,7 @@ app.use('/user',userRouter)
 app.use('/assignment',assignmentRouter)
 app.use('/Test',Testpath)
 app.use("/notes", notesRoutes);
+app.use('/lectures',lectureRouter)
 
 app.listen(PORT, ()=>{
     console.log(`Server running on http://localhost:${PORT}`);
