@@ -122,10 +122,24 @@ const getAllTests = async (req, res) => {
   }
 };
 
+const gettestbyid = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const test = await Test.findById(id)
+    if(!test){
+      res.status(404).json({message:"Test Not Found!"})
+    }
+    res.status(200).json(test);
+    }catch (error) {
+      res.status(500).json({ message: 'Error fetching test' });
+  }
+}
+
 export{
     createTest,
     deleteTest,
     calculateTestResult,
-    getAllTests
+    getAllTests,
+    gettestbyid
     
 }
