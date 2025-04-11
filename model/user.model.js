@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     password: {type: String, required: true},
     course: {type:String, required:true},
     year: {type:String, required:true},
-    profilePic: {type:String}
+    profilePic: {type:String},
 },{
     timestamps: true
 })

@@ -135,11 +135,36 @@ const gettestbyid = async (req, res) => {
   }
 }
 
+const checkIfAttempted = async (req, res) => {
+  try {
+    const { testId } = req.params;
+
+    const user = req.session.user;
+    if (!user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const test = await Test.findById(testId);
+    if (!test) {
+      return res.status(404).json({ message: "Test not found" });
+    }
+
+    const alreadyAttempted = test.attemptedBy.includes(user._id);
+    return res.status(200).json({ attempted: alreadyAttempted });
+  } catch (err) {
+    console.error("Error checking attempt:", err);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: err.message,
+    });
+  }
+};
+
 export{
     createTest,
     deleteTest,
     calculateTestResult,
     getAllTests,
+    checkIfAttempted,
     gettestbyid
-    
 }

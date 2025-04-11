@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { calculateTestResult, createTest, deleteTest, getAllTests, gettestbyid } from "../controller/test.controller.js";
+import { calculateTestResult, checkIfAttempted, createTest, deleteTest, getAllTests, gettestbyid } from "../controller/test.controller.js";
 import protect from "../middleware/jwt.middleware.js";
 import Test from "../model/test.model.js";
 
@@ -11,4 +11,5 @@ Testpath.delete('/:id',deleteTest)
 Testpath.post('/calculate-test',calculateTestResult)
 Testpath.get('/alltest',getAllTests)
 Testpath.get('/:id',gettestbyid)
+Testpath.get('/check-attempt/:testId',checkIfAttempted)
 export default Testpath
