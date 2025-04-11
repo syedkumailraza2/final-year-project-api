@@ -11,5 +11,4 @@ Testpath.delete('/:id',deleteTest)
 Testpath.post('/calculate-test',calculateTestResult)
 Testpath.get('/alltest',getAllTests)
 Testpath.get('/:id',gettestbyid)
-Testpath.get('/check-attempt/:testId',checkIfAttempted)
 export default Testpath
