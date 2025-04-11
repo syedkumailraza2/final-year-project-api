@@ -22,6 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
+
 // Static files configuration
 const uploadsDir = path.join(__dirname, "public", "uploads");
 app.use("/uploads", express.static(uploadsDir, {
