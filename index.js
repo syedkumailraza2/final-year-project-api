@@ -20,9 +20,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-app.use(cors({
-    origin: "https://final-year-project-chi-six.vercel.app",
-  }));
+app.use(cors())
 
 
 // Static files configuration
