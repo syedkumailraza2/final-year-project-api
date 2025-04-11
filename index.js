@@ -20,11 +20,7 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-app.use(cors({
-    origin: "final-year-project-chi-six.vercel.app",
-    credentials: true 
-}))
-
+app.use(cors())
 
 // Static files configuration
 const uploadsDir = path.join(__dirname, "public", "uploads");
