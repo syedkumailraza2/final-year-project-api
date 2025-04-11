@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 //do not change it team mates
 app.use(cors({
-    origin: 'https://final-year-project-api-iota.vercel.app',
+    origin: ['http://localhost:5173','https://final-year-project-api-iota.vercel.app'],
     credentials: true
   }));
 
