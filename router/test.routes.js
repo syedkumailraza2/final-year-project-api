@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { calculateTestResult, checkIfAttempted, createTest, deleteTest, getAllTests, gettestbyid } from "../controller/test.controller.js";
+import { calculateTestResult, createTest, deleteTest, getAllTests, gettestbyid } from "../controller/test.controller.js";
 import protect from "../middleware/jwt.middleware.js";
 import Test from "../model/test.model.js";
 
