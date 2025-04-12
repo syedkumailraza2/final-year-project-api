@@ -8,6 +8,13 @@ const createTest = async(req,res)=>{
         if (!title || !date || !time || !duration) {
             return res.status(400).json({ message: "All required fields must be provided." });
         }
+         // Combine date and time into a full Date object
+    const [hours, minutes] = time.split(':');
+    const startDateTime = new Date(date);
+    startDateTime.setHours(parseInt(hours), parseInt(minutes));
+
+    // Set expiry 24 hours after the test start time
+    const expiresAt = new Date(startDateTime.getTime() + 24 * 60 * 60 * 1000);
         
         const createdTest = await Test.create({
             title,
@@ -18,7 +25,8 @@ const createTest = async(req,res)=>{
             question2,
             question3,
             question4,
-            question5
+            question5,
+            expiresAt 
         })
         res.status(201).json({ createdTest });
 

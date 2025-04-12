@@ -60,6 +60,7 @@ const testSchema =  new mongoose.Schema({
             type:String
         }
     }],
+    expiresAt: { type: Date, expires: 0 },
 },{timestamps:true})
 
  const Test = mongoose.model("Test",testSchema)
