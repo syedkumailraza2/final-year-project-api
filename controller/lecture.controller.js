@@ -51,7 +51,7 @@ const updateLecture = async (req, res) => {
 
 const getLectures = async (req, res) => {
     try {
-        const lectures = await Lecture.find();
+        const lectures = await Lecture.find().sort({ date: 1, time: 1 });
         return res.status(200).json({ lectures: lectures });
     } catch (error) {
         console.log('Error while Getting lecture:',error)
