@@ -2,28 +2,31 @@ import Lecture from "../model/lecture.model.js";
 
 const createLecture = async (req, res) => {
     try {
-        const { title, date, instructor } = req.body;
+        const { title, date, time, instructor } = req.body;
+
         if (!title) {
             return res.status(400).json({ message: "Title is required" });
         }
         if (!date) {
             return res.status(400).json({ message: "Date is required" });
         }
+        if (!time) {
+            return res.status(400).json({ message: "Time is required" });
+        }
         if (!instructor) {
             return res.status(400).json({ message: "Instructor is required" });
         }
 
-        const newLecture = new Lecture({ title, date, instructor });
+        const newLecture = new Lecture({ title, date, time, instructor });
         await newLecture.save();
 
         return res.status(201).json({ lecture: newLecture });
 
     } catch (error) {
-        console.log('Error while creating lecture:', error)
-        return res.status(500).json({ message: 'Internal Server Error' })
-
+        console.log('Error while creating lecture:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
-}
+};
 
 const updateLecture = async (req, res) => {
     try {
